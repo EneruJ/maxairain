@@ -43,20 +43,20 @@ class _IdentificationState extends State<Identification> {
     final File imageFile = File(imagePath);
     final imageBytes = await imageFile.readAsBytes();
     final base64Image = base64Encode(imageBytes);
-    return base64Image;
+    final formattedImage = 'data:image/jpeg;base64,$base64Image';
+    return formattedImage;
   }
 
   Future<void> _sendImageToApi(String base64Image) async {
     try {
-      const apiUrl = 'https://testmaxairain-bf60.restdb.io/rest/imagetest';
+      const apiUrl = 'https://facerecognitionmaxairain.osc-fr1.scalingo.io/api/v1/face-recognition';
       final headers = {
         'Content-Type': 'application/json',
-        'x-apikey': '93c82103771ae560c043bb618cb6da4b9eca0',
+        'Access-Control-Allow-Origin': '*',
       };
 
       final body = jsonEncode({
-        'image': base64Image,
-        'date': DateTime.now().toIso8601String(),
+        'picture': base64Image,
       });
 
       final response = await http.post(
@@ -66,12 +66,99 @@ class _IdentificationState extends State<Identification> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Image envoyée avec succes !');
+        final responseData = jsonDecode(response.body);
+        final isSimilar = responseData['similar'] ?? false;
+        final score = responseData['score'];
+        final userId = responseData['userId'] ?? '';
+
+        if (isSimilar) {
+          print('Identification validée, utilisateur trouvé. Score code: $score, userId: $userId');
+
+          // Show success notification
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Identification validée, veuillez patienter.',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ).closed.then((_) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Logged(userId: userId)),
+            );
+          });
+        } else {
+          print('Identification non validée, utilisateur non trouvé. Score code: $score');
+
+          // Show failure notification
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(
+                    Icons.error,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Identification non validée. Utilisateur non trouvé.',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          );
+        }
       } else {
         print('Echec de l\'envoi de l\'image. Status code: ${response.statusCode}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(
+                  Icons.error,
+                  color: Colors.white,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  'Echec de l\'envoi de l\'image.',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
       }
     } catch (e) {
-      print('Echec de l\'envoi de l\'image : $e');
+      print('Echec de l\'envoi de l\'image. Erreur: $e');
     }
   }
 
@@ -79,7 +166,11 @@ class _IdentificationState extends State<Identification> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Identification'),
+        title: const Text(
+          'Identification',
+          style: TextStyle(color: Color(0xFF379EC1)),
+        ),
+        backgroundColor: Colors.white,
       ),
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
@@ -96,7 +187,7 @@ class _IdentificationState extends State<Identification> {
         },
       ),
       bottomNavigationBar: BottomAppBar(
-        color: Colors.blue,
+        color: const Color(0xFF379EC1),
         child: Container(
           padding: const EdgeInsets.all(16.0),
           child: const Text(
@@ -110,6 +201,7 @@ class _IdentificationState extends State<Identification> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: const Color(0xFF379EC1),
         onPressed: () async {
           try {
             await _initializeControllerFuture;
@@ -119,34 +211,6 @@ class _IdentificationState extends State<Identification> {
 
             await _sendImageToApi(base64Image);
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: Colors.white,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Identification validée, veuillez patienter.',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-                backgroundColor: Colors.green,
-                duration: const Duration(seconds: 2),
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ).closed.then((_) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const Logged()),
-              );
-            });
           } catch (e) {
             print('Error capturing image: $e');
           }

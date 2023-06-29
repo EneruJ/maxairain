@@ -59,24 +59,24 @@ class _RegisterState extends State<Register> {
     final File imageFile = File(imagePath);
     final imageBytes = await imageFile.readAsBytes();
     final base64Image = base64Encode(imageBytes);
-    return base64Image;
+    final formattedImage = 'data:image/jpeg;base64,$base64Image';
+    return formattedImage;
   }
 
   Future<void> _sendImageToApi(
       String base64Image, String name, String lastName) async {
     try {
-      const apiUrl = 'https://testmaxairain-bf60.restdb.io/rest/registertest';
+      const apiUrl = 'https://facerecognitionmaxairain.osc-fr1.scalingo.io/api/v1/users/create';
       final headers = {
         'Content-Type': 'application/json',
-        'x-apikey': '93c82103771ae560c043bb618cb6da4b9eca0',
+        'Access-Control-Allow-Origin': '*',
       };
 
       final body = jsonEncode({
-        'image': base64Image,
-        'name': name,
+        'picture': base64Image,
+        'firstname': name,
         'lastname': lastName,
-        'poste': _selectedJob,
-        'date': DateTime.now().toIso8601String(),
+        'role': _selectedJob,
       });
 
       final response = await http.post(
@@ -86,7 +86,7 @@ class _RegisterState extends State<Register> {
       );
 
       if (response.statusCode == 201 || response.statusCode == 200) {
-        print('Registration sent to API');
+        print('Inscription validée');
         // Add a snackbar to inform the user that the registration was sent
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -118,7 +118,7 @@ class _RegisterState extends State<Register> {
           );
         });
       } else {
-        throw Exception('Failed to send registration to API');
+        throw Exception('Echec de l\'inscription');
       }
     } catch (e) {
       print(e);

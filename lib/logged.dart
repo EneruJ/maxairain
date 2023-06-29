@@ -276,10 +276,13 @@ class _LoggedState extends State<Logged> {
   @override
   Widget build(BuildContext context) {
     if (firstReservation == null || firstReservation!.materiauxList.isEmpty) {
-      // Display default UI
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Ecran de saisie du matériel'),
+          title: const Text(
+            'Ecran de saisie du matériel',
+            style: TextStyle(color: Color(0xFF379EC1)),
+          ),
+          backgroundColor: Colors.white,
         ),
         body: const Center(
           child: Column(
@@ -297,13 +300,16 @@ class _LoggedState extends State<Logged> {
       );
     } else {
       if (selectedMateriaux.isEmpty) {
-        // Initialize selectedMateriaux with all materials from firstReservation
         selectedMateriaux.addAll(firstReservation!.materiauxList);
       }
 
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Ecran de saisie du matériel'),
+          title: const Text(
+            'Ecran de saisie du matériel',
+            style: TextStyle(color: Color(0xFF379EC1)),
+          ),
+          backgroundColor: Colors.white,
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -330,18 +336,17 @@ class _LoggedState extends State<Logged> {
                       final materiaux = firstReservation!.materiauxList[index];
 
                       if (materiaux.quantite == 0) {
-                        // Display "Non disponible" text with product name if quantity is 0
                         return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
                           child: Row(
                             children: [
                               Text(
-                                'Non disponible - ',
-                                style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-                              ),
-                              Text(
                                 materiaux.nom,
-                                style: TextStyle(fontSize: 16),
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              const Text(
+                                ' - Non disponible',
+                                style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
                               ),
                             ],
                           ),
