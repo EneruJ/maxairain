@@ -100,7 +100,7 @@ class _IdentificationState extends State<Identification> {
           ).closed.then((_) {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => Logged(userId: userId)),
+              MaterialPageRoute(builder: (context) => LoggedPage(userId: userId)),
             );
           });
         } else {
