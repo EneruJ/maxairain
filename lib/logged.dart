@@ -28,7 +28,7 @@ class _LoggedPageState extends State<LoggedPage> {
   void fetchData() async {
 
     final userResponse = await http.get(Uri.parse(
-        'https://localhost:8080/api/v1/users/get?userId=${widget.userId}'));
+        'https://facerecognitionmaxairain.osc-fr1.scalingo.io/api/v1/users/get?userId=${widget.userId}'));
 
 
     if (userResponse.statusCode == 200) {
@@ -41,7 +41,7 @@ class _LoggedPageState extends State<LoggedPage> {
     }
 
     final reservationResponse = await http.get(Uri.parse(
-        'https://localhost:8080/api/v1/reservations/get?userId=${widget.userId}'));
+        'https://facerecognitionmaxairain.osc-fr1.scalingo.io/api/v1/reservations/get?userId=${widget.userId}'));
 
     if (reservationResponse.statusCode == 200) {
       final reservationData = jsonDecode(reservationResponse.body);
@@ -50,7 +50,7 @@ class _LoggedPageState extends State<LoggedPage> {
       if (materials.isNotEmpty) {
         for (String materialId in materials) {
           final materialResponse = await http.get(Uri.parse(
-              'https://localhost:8080/api/v1/materials/get?materialId=$materialId'));
+              'https://facerecognitionmaxairain.osc-fr1.scalingo.io/api/v1/materials/get?materialId=$materialId'));
 
           if (materialResponse.statusCode == 200) {
             final materialData = jsonDecode(materialResponse.body);
@@ -68,7 +68,7 @@ class _LoggedPageState extends State<LoggedPage> {
     }
 
     final allMaterialsResponse = await http.get(Uri.parse(
-        'https://localhost:8080/api/v1/materials/getAll'));
+        'https://facerecognitionmaxairain.osc-fr1.scalingo.io/api/v1/materials/getAll'));
 
     if (allMaterialsResponse.statusCode == 200) {
       final materialsData = jsonDecode(allMaterialsResponse.body);
@@ -85,7 +85,7 @@ class _LoggedPageState extends State<LoggedPage> {
       // Step 10: Increase quantityA by 1 for each material in materialsUser
       for (var material in materialsUser) {
         final response = await http.post(Uri.parse(
-            'https://localhost:8080/api/v1/materials/update'),
+            'https://facerecognitionmaxairain.osc-fr1.scalingo.io/api/v1/materials/update'),
             body: {
               'materialId': material['materialId'],
               'quantityA': (material['quantityA'] + 1).toString(),
@@ -108,7 +108,7 @@ class _LoggedPageState extends State<LoggedPage> {
 
       for (var material in materialsUser) {
         final response = await http.post(Uri.parse(
-            'https://localhost:8080/api/v1/materials/update'),
+            'https://facerecognitionmaxairain.osc-fr1.scalingo.io/api/v1/materials/update'),
             body: {
               'materialId': material['materialId'],
               'quantityA': (material['quantityA'] - 1).toString(),
